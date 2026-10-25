@@ -278,7 +278,7 @@ function relativeRotateCamera(axisX, axisY, angle) {
 }
 
 addEventListener("keydown", (event) => {
-    let lastDirection = queue.length ? queue[queue.length - 1] : direction;
+    if (event.repeat) return;
 
     switch (event.key.toLowerCase()) {
         case "w":
