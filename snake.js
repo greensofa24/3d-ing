@@ -277,10 +277,48 @@ function relativeRotateCamera(axisX, axisY, angle) {
     targetRotation.premultiply(step);
 }
 
+function restart() {
+    snake = [{
+        x: 0,
+        y: 0,
+        z: 0
+    }];
+
+    queue = [];
+
+    direction = {
+        x: 0,
+        y: 0,
+        z: 0
+    };
+
+    alive = true;
+    lastTime = 0;
+    accumulator = 0;
+
+    targetRotation.identity();
+    currentRotation.identity();
+
+    camera.position.copy(baselinePosition);
+    camera.up.set(0, 1, 0);
+    camera.lookAt(0, 0, 0);
+
+    newApple();
+    draw();
+
+    requestAnimationFrame(gameLoop);
+}
+
 addEventListener("keydown", (event) => {
     if (event.repeat) return;
 
     switch (event.key.toLowerCase()) {
+        case "r":
+        if (!alive) {
+            restart();
+        }
+        break;
+
         case "w":
             relativeRotateCamera(1, 0, -Math.PI / 2);
             break;

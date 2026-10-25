@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            background-color: black;
+        }
+
+        div {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+
+            height: 5px;
+            width: 50px;
+            border-radius: 2.5px;
+
+            background-color: grey;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        let length = 19;
+
+        let line = Array(length).fill(0);
+        line[(length - 1) / 2] = 1;
+        let direction = 0;
+        let snake = 1;
+        let pendingGrowth = 0;
+
+        let alive = true;
+        let lastTime = 0;
+        let accumulator = 0;
+        const delay = 200;
+
+        function newApple() {
+            let spots = [];
+            for (let s = 0; s < length; s++) {
+                if (line[s] === 0) spots.push(s);
+            }
+
+            if (spots.length > 0) {
+                let rand = spots[Math.floor(Math.random() * spots.length)];
+                line[rand] = 2;
+            }
+        }
+
+        newApple();
+
+        function gameLoop(timestamp) {
+            if (!alive) return;
+
+            if (!lastTime) {
+                lastTime = timestamp;
+            }
+
+            accumulator += timestamp - lastTime;
+            lastTime = timestamp;
+
+            while (accumulator >= delay) {
+                update();
+                accumulator -= delay;
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        requestAnimationFrame(gameLoop);
+
+        function update() {
+            document.body.innerHTML = "";
+
+            if (pendingGrowth > 0) {
+                snake += pendingGrowth;
+                pendingGrowth = 0;
+            }
+
+            let i1 = line.indexOf(1);
+
+            let next = i1 + direction;
+
+            if (next >= 0 && next < length) {
+                line[i1] = (line[i1] == 3) ? 3 : 0; 
+                if (line[next] == 2) {
+                    pendingGrowth = 1;
+                    newApple();
+                }
+                line[next] = 1;
+            }
+
+            let headPos = line.indexOf(1);
+
+            for (let i = 0; i < length; i++) {
+                let div = document.createElement("div");
+
+                let isTail = false;
+                if (direction === 1 && i <= headPos && i > headPos - snake) isTail = true;
+                if (direction === -1 && i >= headPos && i < headPos + snake) isTail = true;
+                if (direction === 0 && i === headPos) isTail = true;
+
+                if (isTail) {
+                    if (line[i] != 1) line[i] = 3;
+                } else {
+                    if (line[i] == 3) line[i] = 0;
+                }
+
+                if (line[i] == 1 || line[i] == 3) {
+                    div.style.backgroundColor = "lime";
+                }
+
+                if (line[i] == 2) {
+                    div.style.backgroundColor = "red";
+                }
+
+                div.style.left = `calc(50% + ${60 * i - 30 * length + 30}px)`; 
+                div.style.transform = "translate(0%, -50%)";
+
+                document.body.appendChild(div);
+            }
+        }
+
+        addEventListener("keydown", (event) => {
+            if (direction) return;
+
+            if (event.key == "ArrowLeft") {
+                direction = -1;
+            }
+
+            if (event.key == "ArrowRight") {
+                direction = 1;
+            }
+        });
+    </script>
+</body>
+
+</html>
