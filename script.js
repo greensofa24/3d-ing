@@ -1,3 +1,8 @@
+import * as THREE from 'three';
+import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
+import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
@@ -20,20 +25,25 @@ const materials = [
 const cube = new THREE.Mesh(geometry, materials);
 scene.add(cube);
 
-// cube outline
-const edges = new THREE.EdgesGeometry(geometry);
-const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 5 });
-const outline = new THREE.LineSegments(edges, lineMaterial);
+const cubeEdgesGeometry = new THREE.EdgesGeometry(cube.geometry); 
+const cubeLineGeometry = new LineSegmentsGeometry().fromEdgesGeometry(cubeEdgesGeometry); 
 
+const lineMaterial = new LineMaterial({
+  color: 0xffffff,
+  linewidth: 5
+});
+lineMaterial.resolution.set(window.innerWidth, window.innerHeight);
+
+const outline = new LineSegments2(cubeLineGeometry, lineMaterial);
 cube.add(outline);
 
+// animation
 const radius = 2;
 const speed = 0.0015;
 
-// animation
 function animate(timestamp) {
   requestAnimationFrame(animate);
-  
+
   cube.rotation.x += 0.01;
   cube.rotation.y += 0.013;
   cube.rotation.z += 0.007;
@@ -41,6 +51,7 @@ function animate(timestamp) {
   const time = timestamp * speed; 
 
   cube.position.x = Math.cos(time) * radius;
+  cube.position.y = Math.cos(time * 3 / 2) * radius * 1 / 2;
   cube.position.z = Math.sin(time) * radius;
 
   const hueShift = 0.003;
